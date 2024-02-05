@@ -59,7 +59,7 @@ const ForgotPassword = () => {
           setEmail("");
           setToast(() => ({
             show: true,
-            background: "danger",
+            background: "success",
             message: data.message,
           }));
         } else {

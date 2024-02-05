@@ -95,7 +95,7 @@ const Register = () => {
       setToast(() => ({
         show: true,
         background: "danger",
-        message: "Fields are required",
+        message: "Error Creating Profile",
       }));
     }
   };

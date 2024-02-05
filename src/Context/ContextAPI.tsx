@@ -1,13 +1,15 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { StaffPickData } from "../helpers/Data.ts";
 import { NavigateFunction, useLocation, useNavigate } from "react-router-dom";
-import { user } from "../helpers/Types.ts";
+import { singleBlogPostType, user } from "../helpers/Types.ts";
 
 type blogDataType = {
   blogData: typeof StaffPickData;
   setBlogData: React.Dispatch<React.SetStateAction<typeof StaffPickData>>;
   loggedUser: user;
   setLoggedUser: React.Dispatch<React.SetStateAction<user>>;
+  selectedBlog: singleBlogPostType;
+  setSelectedBlog: React.Dispatch<React.SetStateAction<singleBlogPostType>>;
 };
 
 // type checkUserType = {
@@ -17,8 +19,10 @@ type blogDataType = {
 const blogDataContext = createContext<blogDataType | null>(null);
 
 const ContextAPI = ({ children }: { children: React.ReactNode }) => {
+  // Hardcoded datas
   const [blogData, setBlogData] = useState(StaffPickData);
 
+  // Logged User Data
   const [loggedUser, setLoggedUser] = useState<user>({
     user_id: 0,
     email: "",
@@ -26,10 +30,22 @@ const ContextAPI = ({ children }: { children: React.ReactNode }) => {
     token: "",
   });
 
+  // Single selected user blog
+  const [selectedBlog, setSelectedBlog] = useState<singleBlogPostType>({
+    blog_id: 0,
+    blog_title: "",
+    blog_description: "",
+    blog_content: "",
+    blog_image: null,
+    published_date: undefined,
+    user_id: 0,
+    author: "",
+  });
+
   const navigate: NavigateFunction = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
-  const paths: string[] = ["/login", "/register", "/forgot"];
+  const paths: string[] = ["/login", "/register", "/forgot", "/showblog"];
 
   useEffect((): void => {
     const userItem: string | null = localStorage.getItem("horizonUser");
@@ -73,7 +89,7 @@ const ContextAPI = ({ children }: { children: React.ReactNode }) => {
         //   .catch(() => console.log());
       }
     } else {
-      if (!paths.includes(currentPath)) {
+      if (!paths.some((path) => currentPath.startsWith(path))) {
         navigate("/", { replace: true });
         setLoggedUser(() => ({
           user_id: 0,
@@ -94,6 +110,8 @@ const ContextAPI = ({ children }: { children: React.ReactNode }) => {
             setBlogData,
             loggedUser,
             setLoggedUser,
+            selectedBlog,
+            setSelectedBlog,
           }}
         >
           {children}

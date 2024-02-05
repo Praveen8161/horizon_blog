@@ -5,11 +5,22 @@ import Form from "react-bootstrap/Form";
 import NavBar from "../Components/NavBar";
 import Button from "react-bootstrap/Button";
 import Image from "react-bootstrap/Image";
+import { API } from "../helpers/API";
+import { user } from "../helpers/Types";
 
 type userDataType = {
   email: string;
   user_name: string;
 };
+
+type serverResponse = {
+  acknowledged: boolean;
+};
+
+// headers: {
+//   "Content-Type": "application/json",
+//   Authorization: `Bearer ${user.token}`,
+// },
 
 const Profile = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -38,6 +49,36 @@ const Profile = () => {
       ...prev,
       [e.target.name]: e.target.value,
     }));
+  };
+
+  const handleNameUpdate = (): void => {
+    if (!userData.user_name) {
+      return;
+    }
+
+    const UNameUpdateAPI = `${API}/user/profile/update`;
+    fetch(UNameUpdateAPI, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${blogState?.loggedUser.token}`,
+      },
+      body: JSON.stringify({ user_name: userData.user_name }),
+    })
+      .then((response) => response.json() as Promise<serverResponse>)
+      .then((data: serverResponse) => {
+        if (data.acknowledged) {
+          if (blogState?.loggedUser) {
+            const tempUser: user = {
+              ...blogState?.loggedUser,
+              user_name: userData.user_name,
+            };
+
+            localStorage.setItem("horizonUser", JSON.stringify(tempUser));
+          }
+        }
+      })
+      .catch((err) => console.log(err));
   };
 
   if (loading) {
@@ -87,12 +128,15 @@ const Profile = () => {
                 type="text"
                 placeholder="User Name"
                 style={{ maxWidth: "250px" }}
+                name="user_name"
                 value={userData.user_name}
                 id="user_name"
                 onChange={(e) => handleUserNameChange(e)}
               />
             </div>
-            <Button variant="primary">Submit</Button>{" "}
+            <Button variant="primary" onClick={handleNameUpdate}>
+              Submit
+            </Button>{" "}
           </div>
         </div>
       </div>

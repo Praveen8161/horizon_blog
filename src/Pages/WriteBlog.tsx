@@ -1,23 +1,89 @@
-import React, { useState } from "react";
+import React, { FC, useRef, useState } from "react";
 import NavBar from "../Components/NavBar";
 import ReactQuill from "react-quill";
 import { Delta } from "quill";
 import "react-quill/dist/quill.snow.css";
 import Form from "react-bootstrap/Form";
+import objChecker from "../helpers/ObjectChecker.ts";
+import Button from "react-bootstrap/Button";
+import { IoMdCloseCircle } from "react-icons/io";
+import { API } from "../helpers/API.ts";
+import { BlogState } from "../Context/ContextAPI.tsx";
+import BlogsList from "../Components/BlogsList.tsx";
+import { singleBlogPostType } from "../helpers/Types.ts";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 
 type blogDataType = {
   blog_title: string;
   blog_description: string;
+  blog_content: string;
 };
 
-const WriteBlog = () => {
+type serverResponse =
+  | {
+      acknowledged: false;
+      error: string;
+    }
+  | {
+      acknowledged: true;
+      blog: singleBlogPostType;
+    };
+
+const WriteBlog: FC = () => {
+  const blogState = BlogState();
   const [blogData, setBlogData] = useState<blogDataType>({
     blog_title: "",
     blog_description: "",
+    blog_content: "",
   });
-  const [content, setContent] = useState<string>("");
-  const [blogLen, setBlogLen] = useState<number>(0);
+  const [file, setFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>();
+  const fileInput = useRef<HTMLInputElement>(null);
 
+  const navigate: NavigateFunction = useNavigate();
+
+  // Handle File Change
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    const uploadedFile = e.target.files ? e.target.files[0] : null;
+    setFile(uploadedFile);
+
+    // If there is a image show preview
+    if (uploadedFile) {
+      const url = URL.createObjectURL(uploadedFile);
+      setPreview(url);
+    } else {
+      setPreview(null);
+    }
+  };
+  // Remove Selected File
+  const removeFile = (): void => {
+    setFile(null);
+    setPreview(null);
+    if (fileInput.current) {
+      fileInput.current.value = "";
+    }
+  };
+
+  // To access blogContent from other functions
+  const [blogLen, setBlogLen] = useState<number>(0);
+  const handleEditorChange = (
+    con: string,
+    // _ means the unused error will not be thrown
+    _delta: Delta,
+    _source: "user" | "api" | "silent",
+    editor: ReactQuill.UnprivilegedEditor
+  ): void => {
+    // It gives deafult length of 1 so we are subtracting 1
+    setBlogLen(editor.getLength() - 1);
+
+    if (editor.getLength() > 5000) return;
+    setBlogData((prev) => ({
+      ...prev,
+      blog_content: con,
+    }));
+  };
+
+  // Updating BlogContent
   const handleBlogData = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -29,16 +95,53 @@ const WriteBlog = () => {
     }));
   };
 
-  const handleEditorChange = (
-    con: string,
-    // _ means the unused error will not be thrown
-    _delta: Delta,
-    _source: "user" | "api" | "silent",
-    editor: ReactQuill.UnprivilegedEditor
-  ): void => {
-    setBlogLen(editor.getLength());
-    if (editor.getLength() > 5000) return;
-    setContent(() => con);
+  const handleNewBlog = (): void => {
+    const checkObject: boolean = objChecker(blogData);
+    // check empty value
+    if (!checkObject) {
+      return;
+    }
+    // Check length of the values
+    if (
+      !(
+        blogLen <= 5000 &&
+        blogData.blog_title.length <= 50 &&
+        blogData.blog_description.length <= 100
+      )
+    ) {
+      return;
+    }
+
+    const formData: FormData = new FormData();
+    if (file) {
+      formData.append("file", file);
+    }
+
+    formData.append("blog_title", blogData.blog_title);
+    formData.append("blog_description", blogData.blog_description);
+    formData.append("blog_content", blogData.blog_content);
+    const newBlogAPI = `${API}/blog/create`;
+
+    fetch(newBlogAPI, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${blogState?.loggedUser.token}`,
+      },
+      body: formData,
+    })
+      .then((response) => {
+        return response.json() as Promise<serverResponse>;
+      })
+      .then((data: serverResponse) => {
+        if (data.acknowledged) {
+          console.log(data);
+          blogState?.setSelectedBlog(data.blog);
+          navigate(`/showblog/${data.blog.blog_id}`);
+        } else {
+          console.log(data);
+        }
+      })
+      .catch((err) => console.log(err));
   };
 
   return (
@@ -46,9 +149,9 @@ const WriteBlog = () => {
       <div>
         <NavBar />
       </div>
-      <section className=" container">
+      <section className=" container pt-2">
         <div className="row">
-          <div className=" col-7">
+          <div className=" col-12 col-md-7">
             {/* Blog Title */}
             <div>
               <Form.Label htmlFor="blog_title" className=" fw-bold">
@@ -112,19 +215,53 @@ const WriteBlog = () => {
             {/* Image Upload */}
             <div>
               <Form.Label className=" fw-bold">Blog Image</Form.Label>
-              <Form.Control type="file" />
+              <Form.Control
+                type="file"
+                ref={fileInput}
+                accept=".jpg,.jpeg,.png"
+                onChange={(e) =>
+                  handleFileChange(e as React.ChangeEvent<HTMLInputElement>)
+                }
+              />
               <>
-                <Form.Text muted style={{ fontSize: "10px" }} className=" me-3">
-                  Image size should be less than 200kb and Image uploading is
-                  not mandatory
+                <Form.Text
+                  muted
+                  style={{ fontSize: "10px", lineHeight: "0.2" }}
+                  className="me-1"
+                >
+                  Image size should be less than 200KB and Image uploading is
+                  not mandatory, Accepted Image format JPG, JPEG, PNG
                 </Form.Text>
+              </>
+              {/* Show uploaded Image Preview */}
+              <>
+                {preview && (
+                  <div
+                    className=" position-relative"
+                    style={{ maxHeight: "100px", maxWidth: "100px" }}
+                  >
+                    <span
+                      onClick={removeFile}
+                      className=" position-absolute "
+                      style={{ top: "-12px", right: "-7px", cursor: "pointer" }}
+                    >
+                      <IoMdCloseCircle color="red" />
+                    </span>
+                    <img
+                      src={preview}
+                      alt="image"
+                      className=""
+                      style={{ maxWidth: "100%", maxHeight: "100%" }}
+                    />
+                  </div>
+                )}
               </>
             </div>
             {/* React Quill Editor */}
-            <div className="mt-3" style={{ minHeight: "500px" }}>
+            <div className="mt-3">
               <ReactQuill
                 theme="snow"
-                value={content}
+                value={blogData.blog_content}
                 onChange={handleEditorChange}
                 style={{ height: "100%" }}
               />
@@ -141,8 +278,21 @@ const WriteBlog = () => {
                 </Form.Text>
               </>
             </div>
+            {/* Create blog Button */}
+            <div className=" mt-2">
+              <Button variant="primary" onClick={handleNewBlog}>
+                Primary
+              </Button>
+            </div>
           </div>
-          <div className=" col-5"></div>
+
+          {/* Side Blog List */}
+          <div
+            className=" col-md-5 d-none d-md-flex flex-column justify-content-center align-items-center"
+            style={{ maxHeight: "60vh" }}
+          >
+            <BlogsList />
+          </div>
         </div>
       </section>
     </div>

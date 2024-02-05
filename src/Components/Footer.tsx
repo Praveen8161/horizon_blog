@@ -6,10 +6,26 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 const Footer = () => {
   const navigate: NavigateFunction = useNavigate();
   return (
-    <div className="container-fluid">
+    <div className="container-fluid position-relative overflow-hidden bg-dark ">
+      {/* Custom shape divider */}
+      {/* <div className="custom-shape-divider-bottom-1707159217">
+        <svg
+          data-name="Layer 1"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 1200 120"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0,0V6c0,21.6,291,111.46,741,110.26,445.39,3.6,459-88.3,459-110.26V0Z"
+            className="shape-fill"
+          ></path>
+        </svg>
+      </div> */}
+
+      {/* Footer Starts */}
       <div
-        className=" text-white bg-dark row overflow-hidden pt-2"
-        style={{ minHeight: "30vh" }}
+        className=" text-white  row overflow-hidden pt-2 position-relative"
+        style={{ minHeight: "30vh", zIndex: "5" }}
       >
         <div className="col-sm-6 px-5 py-md-5 col-md-4 col-12 overflow-hidden">
           <h3

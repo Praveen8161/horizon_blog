@@ -6,7 +6,7 @@ type data = {
 export const StaffPickData: data[] = [
   {
     imgUrl: "/images/anibiotic.jpg",
-    heading: "Anbiotic - How it works?",
+    heading: "Antibiotic - How it works?",
     content: `Lorem, ipsum dolor sit amet cour adipisicing elit. Vel
         cuue tre ipsum dolorum repellendus laudantium unde
         praesentium soluta nam tenetur? Eveniet, quidem provident earum

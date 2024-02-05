@@ -6,6 +6,7 @@ import HomePage from "./Pages/HomePage";
 import Profile from "./Pages/Profile";
 import WriteBlog from "./Pages/WriteBlog";
 import UserBlog from "./Pages/UserBlog";
+import ShowBlog from "./Pages/ShowBlog";
 
 const App = () => {
   return (
@@ -18,7 +19,8 @@ const App = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/write" element={<WriteBlog />} />
         <Route path="/userblog" element={<UserBlog />} />
-        <Route path="*" element={<Login />} />
+        <Route path="/showblog/:id" element={<ShowBlog />} />
+        <Route path="*" element={<HomePage />} />
       </Routes>
     </>
   );
