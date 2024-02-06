@@ -1,0 +1,22 @@
+-- How the image is handled in the Edit Blog
+
+    The Image can be initially set be either Null or Image Path
+    The Initial value is stored in the Preview State ( Preview == Null or path )
+    And every Time a image is changed the File will be Updated to both Preview and File State
+
+-- case 1 : 
+    Initial preview is Null 
+    User Doesn't change anything so File and Preview is Null 
+    server request containing Null
+-- case 2 :
+    Initial preview is string
+    User Doesn't change anything so File is null and Preview is string
+    server request containing string
+-- case 3 :
+    Initial preview is string
+    User change image so File is string and Preview is string
+    server request containing string
+-- case 4 : 
+    Initial preview is null
+    User change image so File is string and Preview is string
+    server request containing string

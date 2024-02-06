@@ -4,7 +4,6 @@ import ReactQuill from "react-quill";
 import { Delta } from "quill";
 import "react-quill/dist/quill.snow.css";
 import Form from "react-bootstrap/Form";
-import objChecker from "../helpers/ObjectChecker.ts";
 import { IoMdCloseCircle } from "react-icons/io";
 import { BlogState } from "../Context/ContextAPI.tsx";
 import Button from "react-bootstrap/Button";
@@ -14,9 +13,11 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 import parse from "html-react-parser";
 
 type blogDataType = {
+  blog_id: number;
   blog_title: string;
   blog_description: string;
   blog_content: string;
+  blog_image: string | null;
 };
 
 type serverResponse =
@@ -32,17 +33,19 @@ type serverResponse =
 const EditBlog: FC = () => {
   const blogState = BlogState();
   const navigate: NavigateFunction = useNavigate();
+
   // To manage Blog State
   const [blogData, setBlogData] = useState<blogDataType>({
+    blog_id: 0,
     blog_title: "",
     blog_description: "",
     blog_content: "",
+    blog_image: "",
   });
   // To manage Image State
-  const [preview, setPreview] = useState<string | null>();
+  const [preview, setPreview] = useState<string | null>(null);
   // Handling Image for server side upload
   const [file, setFile] = useState<File | null>(null);
-
   const fileInput = useRef<HTMLInputElement>(null);
 
   // Handle File Change
@@ -63,7 +66,7 @@ const EditBlog: FC = () => {
   const removeFile = (): void => {
     setFile(null);
     setPreview(null);
-    // Remove from Html Element
+    // Remove from HTML Element
     if (fileInput.current) {
       fileInput.current.value = "";
     }
@@ -73,14 +76,14 @@ const EditBlog: FC = () => {
   const [blogLen, setBlogLen] = useState<number>(0);
 
   // For React Quill -- To Extract Content
+  // '_' -- underscore means the unused error will not be thrown
   const handleEditorChange = (
     con: string,
-    // _ means the unused error will not be thrown
     _delta: Delta,
     _source: "user" | "api" | "silent",
     editor: ReactQuill.UnprivilegedEditor
   ): void => {
-    // It gives deafult length of 1 so we are subtracting 1
+    // It gives deafult length of 1 so I am subtracting 1
     setBlogLen(editor.getLength() - 1);
 
     // Updating the Blog Data State
@@ -104,11 +107,17 @@ const EditBlog: FC = () => {
   };
 
   const handleUpdateBlog = (): void => {
-    const checkObject: boolean = objChecker(blogData);
     // check empty value
-    if (!checkObject) {
+    if (
+      !(
+        blogData.blog_description &&
+        blogData.blog_content &&
+        blogData.blog_title
+      )
+    ) {
       return;
     }
+
     // Check length of the values
     if (
       !(
@@ -121,18 +130,27 @@ const EditBlog: FC = () => {
     }
 
     // Collecting blog Data for Blog Update
+    // Adding Image if available
+    // Working - see the file Image handling in Helpers folder
     const formData: FormData = new FormData();
     if (file) {
       formData.append("file", file);
+    } else if (preview === `${API}/${blogData.blog_image}` && preview) {
+      formData.append("image_path", preview);
+    }
+
+    // Sending blog_id as String because the formdata doesn't support number | undefined
+    if (blogData.blog_id) {
+      formData.append("blog_id", blogData.blog_id.toString());
     }
 
     formData.append("blog_title", blogData.blog_title);
     formData.append("blog_description", blogData.blog_description);
     formData.append("blog_content", blogData.blog_content);
-    const updateBlogAPI = `${API}/blog/update`;
 
+    const updateBlogAPI = `${API}/blog/update`;
     fetch(updateBlogAPI, {
-      method: "POST",
+      method: "PUT",
       headers: {
         Authorization: `Bearer ${blogState?.loggedUser.token}`,
       },
@@ -151,10 +169,8 @@ const EditBlog: FC = () => {
                 return val;
               }
             }) || [];
-
           blogState?.setUserBlogList(tempBlogList);
-
-          // Removing the selectedChat so the blog can reload
+          // Removing the selectedChat so the blog can reload when Redirected to Show Blog Page
           blogState?.setSelectedBlog({
             blog_id: 0,
             blog_title: "",
@@ -165,8 +181,7 @@ const EditBlog: FC = () => {
             user_id: 0,
             author: "",
           });
-
-          //   Navigate to Show Blog Page
+          // Navigate to Show Blog Page
           navigate(`/showblog/${data.blog.blog_id}`);
         } else {
           console.log(data);
@@ -181,12 +196,16 @@ const EditBlog: FC = () => {
       navigate("/userblog");
     } else {
       setBlogData(() => ({
+        blog_id: blogState.editBlog.blog_id,
         blog_title: blogState.editBlog.blog_title,
         blog_description: blogState.editBlog.blog_description,
         blog_content: blogState.editBlog.blog_content,
+        blog_image: blogState.editBlog.blog_image,
       }));
 
-      setPreview(`${API}/${blogState.editBlog.blog_image}`);
+      if (blogState?.editBlog.blog_image) {
+        setPreview(`${API}/${blogState.editBlog.blog_image}`);
+      }
     }
 
     // When Unmounting it will reset the editBlog State
@@ -205,13 +224,15 @@ const EditBlog: FC = () => {
   }, []);
 
   return (
-    <main>
+    <div>
       <header>
         <NavBar />
       </header>
-      <section className=" container-fluid pt-2 px-5">
+
+      {/* Editor and Live Preview */}
+      <main className=" container-fluid pt-2 px-lg-5">
         <div className="row">
-          <div className=" col-12 col-md-5">
+          <section className=" col-12 col-md-5">
             {/* Blog Title */}
             <div>
               <Form.Label htmlFor="blog_title" className=" fw-bold">
@@ -317,6 +338,7 @@ const EditBlog: FC = () => {
                 )}
               </>
             </div>
+
             {/* React Quill Editor */}
             <div className="mt-3">
               <ReactQuill
@@ -338,19 +360,26 @@ const EditBlog: FC = () => {
                 </Form.Text>
               </>
             </div>
+
             {/* Create blog Button */}
             <div className=" mt-2 text-end">
-              <Button variant="primary" onClick={handleUpdateBlog}>
+              <Button
+                variant="primary"
+                onClick={() => {
+                  handleUpdateBlog();
+                }}
+              >
                 Update
               </Button>
             </div>
-          </div>
+          </section>
 
           {/* Side Blog List */}
-          <div
-            className=" col-md-6 d-none d-md-block"
+          <section
+            className=" col-md-7 d-none d-md-block"
             style={{ minHeight: "60vh" }}
           >
+            {/* Section Heading */}
             <p className=" d-flex flex-column">
               <span className=" fs-5 fw-medium text-center">Live Preview</span>{" "}
               <span className="" style={{ fontSize: "10px" }}>
@@ -358,8 +387,9 @@ const EditBlog: FC = () => {
               </span>
             </p>
 
+            {/* Live Preview column */}
             <div
-              className=" border d-md-flex flex-column   border-black"
+              className=" border d-md-flex flex-column border-black px-2"
               style={{ minHeight: "100%" }}
             >
               {/* Blog Title */}
@@ -384,10 +414,10 @@ const EditBlog: FC = () => {
               {/* Blog Content */}
               <div>{parse(blogData.blog_content || "")}</div>
             </div>
-          </div>
+          </section>
         </div>
-      </section>
-    </main>
+      </main>
+    </div>
   );
 };
 

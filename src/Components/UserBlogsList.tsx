@@ -4,6 +4,8 @@ import { RiEditLine } from "react-icons/ri";
 import { MdOutlineDeleteOutline } from "react-icons/md";
 import { API } from "../helpers/API";
 import { singleBlogPostType } from "../helpers/Types";
+import Button from "react-bootstrap/Button";
+import { useState } from "react";
 
 type deleteServerResponse =
   | {
@@ -14,9 +16,21 @@ type deleteServerResponse =
       acknowledged: true;
     };
 
+type confirmDeleteType =
+  | {
+      confirm: true;
+      id: number;
+    }
+  | {
+      confirm: false;
+    };
+
 const UserBlogsList = () => {
   const blogState = BlogState();
   const navigate: NavigateFunction = useNavigate();
+  const [confirmDel, setConfirmDel] = useState<confirmDeleteType>({
+    confirm: false,
+  });
 
   const handleDeleteBlog = (id: number): void => {
     if (!id) return;
@@ -25,6 +39,10 @@ const UserBlogsList = () => {
       blogState?.userBlogList.filter((val) => val.blog_id !== id) || [];
 
     blogState?.setUserBlogList(tempBlogList);
+
+    setConfirmDel({
+      confirm: false,
+    });
 
     const delBlogAPI = `${API}/user/delete`;
 
@@ -51,7 +69,7 @@ const UserBlogsList = () => {
   };
 
   return (
-    <div className=" px-5 d-flex justify-content-center align-items-center flex-column ">
+    <div className=" px-sm-5 d-flex justify-content-center align-items-center flex-column">
       <h4 className=" text-center fs-5">Blog List</h4>
       {blogState?.userBlogList.length && (
         <div className=" d-flex flex-column gap-2">
@@ -91,7 +109,12 @@ const UserBlogsList = () => {
                   </span>
                   {/* Delete Button */}
                   <span
-                    onClick={() => handleDeleteBlog(val.blog_id)}
+                    onClick={() =>
+                      setConfirmDel({
+                        confirm: true,
+                        id: val.blog_id,
+                      })
+                    }
                     style={{ cursor: "pointer" }}
                   >
                     <MdOutlineDeleteOutline />
@@ -114,6 +137,38 @@ const UserBlogsList = () => {
               </p>
             </div>
           ))}
+        </div>
+      )}
+      {/* Confirm Delete Button */}
+      {confirmDel.confirm && (
+        <div
+          className=" position-absolute rounded-3 top-0 end-0 start-0 bottom-0 d-flex justify-content-center align-items-center"
+          style={{ maxWidth: "100vw", maxHeight: "100vh" }}
+        >
+          <div
+            className=" bg-dark-subtle px-3 py-2 rounded-3 d-flex justify-content-center align-items-center flex-column"
+            style={{ minHeight: "30vh", minWidth: "30vw" }}
+          >
+            <p className=" fs-6 fw-medium">Confirm Delete?</p>
+            <div className=" d-flex justify-content-center align-items-center gap-2 flex-row">
+              <Button
+                variant="danger"
+                onClick={() => handleDeleteBlog(confirmDel.id)}
+              >
+                Delete
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() =>
+                  setConfirmDel({
+                    confirm: false,
+                  })
+                }
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
         </div>
       )}
     </div>

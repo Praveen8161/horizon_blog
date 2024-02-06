@@ -4,7 +4,6 @@ import ReactQuill from "react-quill";
 import { Delta } from "quill";
 import "react-quill/dist/quill.snow.css";
 import Form from "react-bootstrap/Form";
-import objChecker from "../helpers/ObjectChecker.ts";
 import Button from "react-bootstrap/Button";
 import { IoMdCloseCircle } from "react-icons/io";
 import { API } from "../helpers/API.ts";
@@ -96,9 +95,14 @@ const WriteBlog: FC = () => {
   };
 
   const handleNewBlog = (): void => {
-    const checkObject: boolean = objChecker(blogData);
     // check empty value
-    if (!checkObject) {
+    if (
+      !(
+        blogData.blog_description &&
+        blogData.blog_content &&
+        blogData.blog_title
+      )
+    ) {
       return;
     }
     // Check length of the values

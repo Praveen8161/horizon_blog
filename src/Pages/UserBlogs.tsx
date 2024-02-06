@@ -58,7 +58,7 @@ const UserBlogs: FC = () => {
 
   //
   return (
-    <main>
+    <main className="position-relative">
       {/* Nav Bar */}
       <div>
         <NavBar />
