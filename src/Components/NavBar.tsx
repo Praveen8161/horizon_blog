@@ -7,6 +7,7 @@ import { NavigateFunction, useNavigate } from "react-router-dom";
 import { BlogState } from "../Context/ContextAPI";
 import { useEffect, useState } from "react";
 import { user } from "../helpers/Types.ts";
+import { MdOutlineModeEdit } from "react-icons/md";
 
 function NavBar() {
   const navigate: NavigateFunction = useNavigate();
@@ -40,7 +41,7 @@ function NavBar() {
     <Navbar
       collapseOnSelect
       expand="sm"
-      className="bg-body-tertiary border-bottom border-black text-black"
+      className=" border-black text-black nav_bg"
     >
       <Container>
         <Navbar.Brand
@@ -65,7 +66,7 @@ function NavBar() {
                   style={{ minWidth: "50px" }}
                   onClick={() => navigate("/write")}
                 >
-                  Write
+                  <MdOutlineModeEdit /> Write
                 </Nav.Link>
                 <Nav.Link
                   className="text-black fw-medium d-none d-sm-block align-self-center"
@@ -103,6 +104,7 @@ function NavBar() {
                   className=" d-sm-none "
                   onClick={() => navigate("/write")}
                 >
+                  <MdOutlineModeEdit />
                   Write Blog
                 </NavDropdown.Item>
                 <NavDropdown.Item

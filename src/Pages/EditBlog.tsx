@@ -1,17 +1,17 @@
-import React, { FC, useRef, useState } from "react";
+import React, { FC, useEffect, useRef, useState } from "react";
 import NavBar from "../Components/NavBar";
 import ReactQuill from "react-quill";
 import { Delta } from "quill";
 import "react-quill/dist/quill.snow.css";
 import Form from "react-bootstrap/Form";
 import objChecker from "../helpers/ObjectChecker.ts";
-import Button from "react-bootstrap/Button";
 import { IoMdCloseCircle } from "react-icons/io";
-import { API } from "../helpers/API.ts";
 import { BlogState } from "../Context/ContextAPI.tsx";
-import BlogsList from "../Components/BlogsList.tsx";
+import Button from "react-bootstrap/Button";
+import { API } from "../helpers/API.ts";
 import { singleBlogPostType } from "../helpers/Types.ts";
 import { NavigateFunction, useNavigate } from "react-router-dom";
+import parse from "html-react-parser";
 
 type blogDataType = {
   blog_title: string;
@@ -29,18 +29,21 @@ type serverResponse =
       blog: singleBlogPostType;
     };
 
-const WriteBlog: FC = () => {
+const EditBlog: FC = () => {
   const blogState = BlogState();
+  const navigate: NavigateFunction = useNavigate();
+  // To manage Blog State
   const [blogData, setBlogData] = useState<blogDataType>({
     blog_title: "",
     blog_description: "",
     blog_content: "",
   });
-  const [file, setFile] = useState<File | null>(null);
+  // To manage Image State
   const [preview, setPreview] = useState<string | null>();
-  const fileInput = useRef<HTMLInputElement>(null);
+  // Handling Image for server side upload
+  const [file, setFile] = useState<File | null>(null);
 
-  const navigate: NavigateFunction = useNavigate();
+  const fileInput = useRef<HTMLInputElement>(null);
 
   // Handle File Change
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -55,17 +58,21 @@ const WriteBlog: FC = () => {
       setPreview(null);
     }
   };
+
   // Remove Selected File
   const removeFile = (): void => {
     setFile(null);
     setPreview(null);
+    // Remove from Html Element
     if (fileInput.current) {
       fileInput.current.value = "";
     }
   };
 
-  // To access blogContent from other functions
+  // To get length of blogContent for other functions
   const [blogLen, setBlogLen] = useState<number>(0);
+
+  // For React Quill -- To Extract Content
   const handleEditorChange = (
     con: string,
     // _ means the unused error will not be thrown
@@ -76,6 +83,7 @@ const WriteBlog: FC = () => {
     // It gives deafult length of 1 so we are subtracting 1
     setBlogLen(editor.getLength() - 1);
 
+    // Updating the Blog Data State
     if (editor.getLength() > 5000) return;
     setBlogData((prev) => ({
       ...prev,
@@ -83,7 +91,7 @@ const WriteBlog: FC = () => {
     }));
   };
 
-  // Updating BlogContent
+  // Updating Blog Data State
   const handleBlogData = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -95,7 +103,7 @@ const WriteBlog: FC = () => {
     }));
   };
 
-  const handleNewBlog = (): void => {
+  const handleUpdateBlog = (): void => {
     const checkObject: boolean = objChecker(blogData);
     // check empty value
     if (!checkObject) {
@@ -112,6 +120,7 @@ const WriteBlog: FC = () => {
       return;
     }
 
+    // Collecting blog Data for Blog Update
     const formData: FormData = new FormData();
     if (file) {
       formData.append("file", file);
@@ -120,9 +129,9 @@ const WriteBlog: FC = () => {
     formData.append("blog_title", blogData.blog_title);
     formData.append("blog_description", blogData.blog_description);
     formData.append("blog_content", blogData.blog_content);
-    const newBlogAPI = `${API}/blog/create`;
+    const updateBlogAPI = `${API}/blog/update`;
 
-    fetch(newBlogAPI, {
+    fetch(updateBlogAPI, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${blogState?.loggedUser.token}`,
@@ -134,7 +143,30 @@ const WriteBlog: FC = () => {
       })
       .then((data: serverResponse) => {
         if (data.acknowledged) {
-          blogState?.setSelectedBlog(data.blog);
+          const tempBlogList =
+            blogState?.userBlogList.map((val) => {
+              if (val.blog_id === data.blog.blog_id) {
+                return data.blog;
+              } else {
+                return val;
+              }
+            }) || [];
+
+          blogState?.setUserBlogList(tempBlogList);
+
+          // Removing the selectedChat so the blog can reload
+          blogState?.setSelectedBlog({
+            blog_id: 0,
+            blog_title: "",
+            blog_description: "",
+            blog_content: "",
+            blog_image: null,
+            published_date: undefined,
+            user_id: 0,
+            author: "",
+          });
+
+          //   Navigate to Show Blog Page
           navigate(`/showblog/${data.blog.blog_id}`);
         } else {
           console.log(data);
@@ -143,14 +175,43 @@ const WriteBlog: FC = () => {
       .catch((err) => console.log(err));
   };
 
+  //   Checking the Editable Blog and updating Local State Blog Data
+  useEffect(() => {
+    if (!blogState?.editBlog.blog_id) {
+      navigate("/userblog");
+    } else {
+      setBlogData(() => ({
+        blog_title: blogState.editBlog.blog_title,
+        blog_description: blogState.editBlog.blog_description,
+        blog_content: blogState.editBlog.blog_content,
+      }));
+
+      setPreview(`${API}/${blogState.editBlog.blog_image}`);
+    }
+
+    // When Unmounting it will reset the editBlog State
+    return () => {
+      blogState?.setEditBlog({
+        blog_id: 0,
+        blog_title: "",
+        blog_description: "",
+        blog_content: "",
+        blog_image: null,
+        published_date: undefined,
+        user_id: 0,
+        author: "",
+      });
+    };
+  }, []);
+
   return (
     <main>
       <header>
         <NavBar />
       </header>
-      <section className=" container pt-2">
+      <section className=" container-fluid pt-2 px-5">
         <div className="row">
-          <div className=" col-12 col-md-7">
+          <div className=" col-12 col-md-5">
             {/* Blog Title */}
             <div>
               <Form.Label htmlFor="blog_title" className=" fw-bold">
@@ -279,18 +340,50 @@ const WriteBlog: FC = () => {
             </div>
             {/* Create blog Button */}
             <div className=" mt-2 text-end">
-              <Button variant="primary" onClick={handleNewBlog}>
-                Publish
+              <Button variant="primary" onClick={handleUpdateBlog}>
+                Update
               </Button>
             </div>
           </div>
 
           {/* Side Blog List */}
           <div
-            className=" col-md-5 d-none d-md-flex flex-column justify-content-center align-items-center"
-            style={{ maxHeight: "60vh" }}
+            className=" col-md-6 d-none d-md-block"
+            style={{ minHeight: "60vh" }}
           >
-            <BlogsList />
+            <p className=" d-flex flex-column">
+              <span className=" fs-5 fw-medium text-center">Live Preview</span>{" "}
+              <span className="" style={{ fontSize: "10px" }}>
+                Blog Description Will not be shown in preview
+              </span>
+            </p>
+
+            <div
+              className=" border d-md-flex flex-column   border-black"
+              style={{ minHeight: "100%" }}
+            >
+              {/* Blog Title */}
+              <p className=" fw-bold fs-4 text-center" style={{}}>
+                {blogData.blog_title.toUpperCase()}
+              </p>
+
+              {/* Blog Image */}
+              {preview && (
+                <p
+                  style={{ maxHeight: "100%", maxWidth: "100%" }}
+                  className=" d-flex justify-content-center align-items-center"
+                >
+                  <img
+                    src={preview}
+                    alt="blog_image"
+                    style={{ maxWidth: "50%", maxHeight: "50%" }}
+                  />
+                </p>
+              )}
+
+              {/* Blog Content */}
+              <div>{parse(blogData.blog_content || "")}</div>
+            </div>
           </div>
         </div>
       </section>
@@ -298,4 +391,4 @@ const WriteBlog: FC = () => {
   );
 };
 
-export default WriteBlog;
+export default EditBlog;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { NavigateFunction, useNavigate, useParams } from "react-router-dom";
 import { BlogState } from "../Context/ContextAPI";
 import { API } from "../helpers/API";
 import NavBar from "../Components/NavBar";
@@ -23,6 +23,9 @@ const ShowBlog = () => {
 
   const [loading, setLoading] = useState<boolean>(true);
 
+  const navigate: NavigateFunction = useNavigate();
+
+  // Get Id from Params
   const { id } = useParams();
   useEffect(() => {
     const numberId: number = Number(id);
@@ -41,11 +44,13 @@ const ShowBlog = () => {
           if (data.acknowledged) {
             blogState?.setSelectedBlog(data.blog);
           } else {
-            console.log(data);
+            setTimeout(() => {
+              navigate("/", { replace: true });
+            }, 3000);
           }
-          setLoading(false);
         })
-        .catch((err) => console.log(err));
+        .catch((err) => console.log(err))
+        .finally(() => setLoading(false));
     } else {
       setLoading(false);
     }
@@ -66,8 +71,10 @@ const ShowBlog = () => {
       </div>
     );
   }
+
+  // Main Return code
   return (
-    <div>
+    <main>
       {/* Navbar */}
       <div>
         <NavBar />
@@ -83,7 +90,7 @@ const ShowBlog = () => {
               {blogState?.selectedBlog.blog_title.toUpperCase()}
             </p>
 
-            {/* Blog author and Date */}
+            {/* Blog author and Date and edit button*/}
             <p className=" d-flex gap-3 flex-row justify-content-end">
               <span>
                 {blogState?.selectedBlog.published_date
@@ -122,10 +129,12 @@ const ShowBlog = () => {
           </div>
         </div>
       </section>
-      <div>
+
+      {/* footer */}
+      <div className=" mt-5">
         <Footer />
       </div>
-    </div>
+    </main>
   );
 };
 

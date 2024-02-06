@@ -1,23 +1,18 @@
 import Card from "react-bootstrap/Card";
+import { data } from "../helpers/Data";
 
-type blogData = {
-  imgUrl?: string;
-  heading: string;
-  content: string;
-};
-
-const BlogCards = ({ values }: { values: blogData }) => {
+const BlogCards = ({ values }: { values: data }) => {
   return (
     <Card className="card_bg" style={{ cursor: "pointer" }}>
       <Card.Img
         variant="top"
         src={`${
-          values.imgUrl ? values.imgUrl : "/images/placeholderImage.svg"
+          values.blog_image ? values.blog_image : "/images/placeholderImage.svg"
         }`}
         loading="lazy"
       />
       <Card.Body>
-        <Card.Title className="fs-6">{values.heading}</Card.Title>
+        <Card.Title className="fs-6">{values.blog_title}</Card.Title>
         <Card.Text
           style={{
             display: "-webkit-box",
@@ -27,7 +22,7 @@ const BlogCards = ({ values }: { values: blogData }) => {
             fontSize: "13px",
           }}
         >
-          {values.content}
+          {values.blog_content}
         </Card.Text>
       </Card.Body>
     </Card>

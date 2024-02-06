@@ -10,11 +10,11 @@ type blogDataType = {
   setLoggedUser: React.Dispatch<React.SetStateAction<user>>;
   selectedBlog: singleBlogPostType;
   setSelectedBlog: React.Dispatch<React.SetStateAction<singleBlogPostType>>;
+  userBlogList: singleBlogPostType[];
+  setUserBlogList: React.Dispatch<React.SetStateAction<singleBlogPostType[]>>;
+  editBlog: singleBlogPostType;
+  setEditBlog: React.Dispatch<React.SetStateAction<singleBlogPostType>>;
 };
-
-// type checkUserType = {
-//   acknowledged: boolean;
-// };
 
 const blogDataContext = createContext<blogDataType | null>(null);
 
@@ -42,6 +42,30 @@ const ContextAPI = ({ children }: { children: React.ReactNode }) => {
     author: "",
   });
 
+  const [userBlogList, setUserBlogList] = useState<singleBlogPostType[]>([
+    {
+      blog_id: 0,
+      blog_title: "",
+      blog_description: "",
+      blog_content: "",
+      blog_image: null,
+      published_date: undefined,
+      user_id: 0,
+      author: "",
+    },
+  ]);
+
+  const [editBlog, setEditBlog] = useState<singleBlogPostType>({
+    blog_id: 0,
+    blog_title: "",
+    blog_description: "",
+    blog_content: "",
+    blog_image: null,
+    published_date: undefined,
+    user_id: 0,
+    author: "",
+  });
+
   const navigate: NavigateFunction = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
@@ -59,34 +83,6 @@ const ContextAPI = ({ children }: { children: React.ReactNode }) => {
         parsedUser.email !== loggedUser.email
       ) {
         setLoggedUser(parsedUser);
-        // // API to check user
-        // const checkUserAPI = `${API}/checkuser`;
-
-        // fetch(checkUserAPI, {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //   },
-        //   body: JSON.stringify({
-        //     user_id: parsedUser.user_id,
-        //     email: parsedUser.email,
-        //   }),
-        // })
-        //   .then((res) => res.json() as Promise<checkUserType>)
-        //   .then((data: checkUserType) => {
-        //     if (!data.acknowledged) {
-        //       localStorage.removeItem("horizonUser");
-        //       if (
-        //         currentPath !== "/login" &&
-        //         currentPath !== "/register" &&
-        //         currentPath !== "/forgot"
-        //       ) {
-        //         navigate("/", { replace: true });
-        //       }
-
-        //     }
-        //   })
-        //   .catch(() => console.log());
       }
     } else {
       if (!paths.some((path) => currentPath.startsWith(path))) {
@@ -112,6 +108,10 @@ const ContextAPI = ({ children }: { children: React.ReactNode }) => {
             setLoggedUser,
             selectedBlog,
             setSelectedBlog,
+            userBlogList,
+            setUserBlogList,
+            editBlog,
+            setEditBlog,
           }}
         >
           {children}
