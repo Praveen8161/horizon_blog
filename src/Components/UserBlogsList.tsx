@@ -142,7 +142,7 @@ const UserBlogsList = () => {
       {/* Confirm Delete Button */}
       {confirmDel.confirm && (
         <div
-          className=" position-absolute rounded-3 top-0 end-0 start-0 bottom-0 d-flex justify-content-center align-items-center"
+          className=" position-fixed z-3 rounded-3 top-0 end-0 start-0 bottom-0 d-flex justify-content-center align-items-center"
           style={{ maxWidth: "100vw", maxHeight: "100vh" }}
         >
           <div
