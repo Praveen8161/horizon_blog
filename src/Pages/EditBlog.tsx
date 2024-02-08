@@ -8,9 +8,10 @@ import { IoMdCloseCircle } from "react-icons/io";
 import { BlogState } from "../Context/ContextAPI.tsx";
 import Button from "react-bootstrap/Button";
 import { API } from "../helpers/API.ts";
-import { singleBlogPostType } from "../helpers/Types.ts";
+import { singleBlogPostType, toastType } from "../helpers/Types.ts";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import parse from "html-react-parser";
+import { Spinner, Toast } from "react-bootstrap";
 
 type blogDataType = {
   blog_id: number;
@@ -33,6 +34,14 @@ type serverResponse =
 const EditBlog: FC = () => {
   const blogState = BlogState();
   const navigate: NavigateFunction = useNavigate();
+
+  const [btnLoading, setBtnLoading] = useState<boolean>(false);
+
+  const [toast, setToast] = useState<toastType>({
+    show: false,
+    background: "danger",
+    message: "",
+  });
 
   // To manage Blog State
   const [blogData, setBlogData] = useState<blogDataType>({
@@ -87,7 +96,15 @@ const EditBlog: FC = () => {
     setBlogLen(editor.getLength() - 1);
 
     // Updating the Blog Data State
-    if (editor.getLength() > 5000) return;
+    if (editor.getLength() > 5001) {
+      setToast(() => ({
+        show: true,
+        background: "danger",
+        message: "Blog characters are more than 5000",
+      }));
+
+      return;
+    }
     setBlogData((prev) => ({
       ...prev,
       blog_content: con,
@@ -115,6 +132,11 @@ const EditBlog: FC = () => {
         blogData.blog_title
       )
     ) {
+      setToast(() => ({
+        show: true,
+        background: "danger",
+        message: "Fields are required",
+      }));
       return;
     }
 
@@ -126,6 +148,11 @@ const EditBlog: FC = () => {
         blogData.blog_description.length <= 100
       )
     ) {
+      setToast(() => ({
+        show: true,
+        background: "danger",
+        message: "Blog data's have more characters",
+      }));
       return;
     }
 
@@ -147,6 +174,8 @@ const EditBlog: FC = () => {
     formData.append("blog_title", blogData.blog_title);
     formData.append("blog_description", blogData.blog_description);
     formData.append("blog_content", blogData.blog_content);
+
+    setBtnLoading(true);
 
     const updateBlogAPI = `${API}/blog/update`;
     fetch(updateBlogAPI, {
@@ -184,10 +213,21 @@ const EditBlog: FC = () => {
           // Navigate to Show Blog Page
           navigate(`/showblog/${data.blog.blog_id}`);
         } else {
-          console.log(data);
+          setToast(() => ({
+            show: true,
+            background: "danger",
+            message: "Error updating blog try again later",
+          }));
         }
       })
-      .catch((err) => console.log(err));
+      .catch(() =>
+        setToast(() => ({
+          show: true,
+          background: "danger",
+          message: "Error updating blog try again later",
+        }))
+      )
+      .finally(() => setBtnLoading(false));
   };
 
   //   Checking the Editable Blog and updating Local State Blog Data
@@ -368,8 +408,13 @@ const EditBlog: FC = () => {
                 onClick={() => {
                   handleUpdateBlog();
                 }}
+                disabled={btnLoading}
               >
-                Update
+                {btnLoading ? (
+                  <Spinner as="span" size="sm" animation="border" />
+                ) : (
+                  "Update"
+                )}
               </Button>
             </div>
           </section>
@@ -416,6 +461,23 @@ const EditBlog: FC = () => {
             </div>
           </section>
         </div>
+
+        {/* Toast */}
+        <Toast
+          onClose={() =>
+            setToast((prev) => ({
+              ...prev,
+              show: false,
+            }))
+          }
+          show={toast.show}
+          delay={3000}
+          bg={toast.background}
+          autohide
+          className=" position-fixed z-3 p-2 end-0 bottom-0 mb-5 me-2 text-white"
+        >
+          <Toast.Body>{toast.message}</Toast.Body>
+        </Toast>
       </main>
     </div>
   );
