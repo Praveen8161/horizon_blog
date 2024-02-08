@@ -28,6 +28,7 @@ const ContextAPI = ({ children }: { children: React.ReactNode }) => {
     email: "",
     user_name: "",
     token: "",
+    profile_image: "",
   });
 
   // Single selected user blog
@@ -92,6 +93,7 @@ const ContextAPI = ({ children }: { children: React.ReactNode }) => {
           email: "",
           user_name: "",
           token: "",
+          profile_image: "",
         }));
       }
     }

@@ -3,6 +3,7 @@ export type user = {
   email: string;
   user_name: string;
   token: string;
+  profile_image: string | null;
 };
 
 export type toastType = {
