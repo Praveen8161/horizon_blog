@@ -150,7 +150,12 @@ const Login = () => {
             />
           </Form.Group>
           <div className="d-flex justify-content-center ">
-            <Button variant="primary" type="submit" style={{ minWidth: "40%" }}>
+            <Button
+              variant="primary"
+              type="submit"
+              style={{ minWidth: "40%" }}
+              disabled={btnLoading}
+            >
               {btnLoading ? (
                 <Spinner as="span" size="sm" animation="border" />
               ) : (
@@ -208,7 +213,7 @@ const Login = () => {
         delay={3000}
         bg={toast.background}
         autohide
-        className=" position-absolute p-2 end-0 bottom-0 mb-5 me-2 text-white"
+        className=" position-fixed p-2 z-3 end-0 bottom-0 mb-5 me-2 text-white"
       >
         <Toast.Body>{toast.message}</Toast.Body>
       </Toast>

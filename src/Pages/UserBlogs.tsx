@@ -3,10 +3,11 @@ import Footer from "../Components/Footer";
 import NavBar from "../Components/NavBar";
 import { API } from "../helpers/API";
 import { BlogState } from "../Context/ContextAPI";
-import { singleBlogPostType } from "../helpers/Types";
+import { singleBlogPostType, toastType } from "../helpers/Types";
 import BlogsList from "../Components/BlogsList";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import UserBlogsList from "../Components/UserBlogsList";
+import { Toast } from "react-bootstrap";
 
 type serverResponse =
   | {
@@ -20,6 +21,11 @@ type serverResponse =
 
 const UserBlogs: FC = () => {
   const blogState = BlogState();
+  const [toast, setToast] = useState<toastType>({
+    show: false,
+    background: "danger",
+    message: "",
+  });
   const [loading, setLoading] = useState<boolean>(true);
   const navigate: NavigateFunction = useNavigate();
 
@@ -41,8 +47,16 @@ const UserBlogs: FC = () => {
             blogState.setUserBlogList(data.blogList);
           }
         })
-        .catch((err) => console.log(err))
-        .finally(() => setLoading(false));
+        .catch(() => {
+          setToast(() => ({
+            show: true,
+            background: "danger",
+            message: "Error Loading Blogs try again later",
+          }));
+        })
+        .finally(() => {
+          setLoading(false);
+        });
     } else {
       setLoading(false);
     }
@@ -102,6 +116,23 @@ const UserBlogs: FC = () => {
       <footer>
         <Footer />
       </footer>
+
+      {/* Toast */}
+      <Toast
+        onClose={() =>
+          setToast((prev) => ({
+            ...prev,
+            show: false,
+          }))
+        }
+        show={toast.show}
+        delay={3000}
+        bg={toast.background}
+        autohide
+        className=" position-fixed p-2 z-3 end-0 bottom-0 mb-5 me-2 text-white"
+      >
+        <Toast.Body>{toast.message}</Toast.Body>
+      </Toast>
     </main>
   );
 };

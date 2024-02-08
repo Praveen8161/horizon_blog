@@ -327,7 +327,7 @@ const Profile = () => {
         delay={3000}
         bg={toast.background}
         autohide
-        className=" position-absolute p-2 end-0 bottom-0 mb-5 me-2 text-white"
+        className=" position-fixed z-3 p-2 end-0 bottom-0 mb-5 me-2 text-white"
       >
         <Toast.Body>{toast.message}</Toast.Body>
       </Toast>

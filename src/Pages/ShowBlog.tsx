@@ -4,9 +4,10 @@ import { BlogState } from "../Context/ContextAPI";
 import { API } from "../helpers/API";
 import NavBar from "../Components/NavBar";
 import BlogsList from "../Components/BlogsList";
-import { singleBlogPostType } from "../helpers/Types";
+import { singleBlogPostType, toastType } from "../helpers/Types";
 import parse from "html-react-parser";
 import Footer from "../Components/Footer";
+import { Toast } from "react-bootstrap";
 
 type serverResponse =
   | {
@@ -20,6 +21,11 @@ type serverResponse =
 
 const ShowBlog = () => {
   const blogState = BlogState();
+  const [toast, setToast] = useState<toastType>({
+    show: false,
+    background: "danger",
+    message: "",
+  });
 
   const [loading, setLoading] = useState<boolean>(true);
 
@@ -44,12 +50,24 @@ const ShowBlog = () => {
           if (data.acknowledged) {
             blogState?.setSelectedBlog(data.blog);
           } else {
+            setToast(() => ({
+              show: true,
+              background: "danger",
+              message: "Unknown blog URL ",
+            }));
+
             setTimeout(() => {
               navigate("/", { replace: true });
             }, 3000);
           }
         })
-        .catch((err) => console.log(err))
+        .catch(() => {
+          setToast(() => ({
+            show: true,
+            background: "danger",
+            message: "Error Loading blog try again later",
+          }));
+        })
         .finally(() => setLoading(false));
     } else {
       setLoading(false);
@@ -90,7 +108,7 @@ const ShowBlog = () => {
               {blogState?.selectedBlog.blog_title.toUpperCase()}
             </p>
 
-            {/* Blog author and Date and edit button*/}
+            {/* Blog author and Date */}
             <p className=" d-flex gap-3 flex-row justify-content-end">
               <span>
                 {blogState?.selectedBlog.published_date
@@ -134,6 +152,23 @@ const ShowBlog = () => {
       <div className=" mt-5">
         <Footer />
       </div>
+
+      {/* Toast */}
+      <Toast
+        onClose={() =>
+          setToast((prev) => ({
+            ...prev,
+            show: false,
+          }))
+        }
+        show={toast.show}
+        delay={3000}
+        bg={toast.background}
+        autohide
+        className=" position-absolute p-2 end-0 bottom-0 mb-5 me-2 text-white"
+      >
+        <Toast.Body>{toast.message}</Toast.Body>
+      </Toast>
     </main>
   );
 };

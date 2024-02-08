@@ -9,8 +9,9 @@ import { IoMdCloseCircle } from "react-icons/io";
 import { API } from "../helpers/API.ts";
 import { BlogState } from "../Context/ContextAPI.tsx";
 import BlogsList from "../Components/BlogsList.tsx";
-import { singleBlogPostType } from "../helpers/Types.ts";
+import { singleBlogPostType, toastType } from "../helpers/Types.ts";
 import { NavigateFunction, useNavigate } from "react-router-dom";
+import { Spinner, Toast } from "react-bootstrap";
 
 type blogDataType = {
   blog_title: string;
@@ -30,6 +31,13 @@ type serverResponse =
 
 const WriteBlog: FC = () => {
   const blogState = BlogState();
+  const [toast, setToast] = useState<toastType>({
+    show: false,
+    background: "danger",
+    message: "",
+  });
+  const [btnLoading, setBtnLoading] = useState<boolean>(false);
+
   const [blogData, setBlogData] = useState<blogDataType>({
     blog_title: "",
     blog_description: "",
@@ -75,7 +83,14 @@ const WriteBlog: FC = () => {
     // It gives deafult length of 1 so we are subtracting 1
     setBlogLen(editor.getLength() - 1);
 
-    if (editor.getLength() > 5000) return;
+    if (editor.getLength() > 5001) {
+      setToast(() => ({
+        show: true,
+        background: "danger",
+        message: "Excess characters in Blog Content",
+      }));
+      return;
+    }
     setBlogData((prev) => ({
       ...prev,
       blog_content: con,
@@ -103,6 +118,11 @@ const WriteBlog: FC = () => {
         blogData.blog_title
       )
     ) {
+      setToast(() => ({
+        show: true,
+        background: "danger",
+        message: "Fields are required",
+      }));
       return;
     }
     // Check length of the values
@@ -113,6 +133,11 @@ const WriteBlog: FC = () => {
         blogData.blog_description.length <= 100
       )
     ) {
+      setToast(() => ({
+        show: true,
+        background: "danger",
+        message: "Excess Characters in Blog data",
+      }));
       return;
     }
 
@@ -124,8 +149,9 @@ const WriteBlog: FC = () => {
     formData.append("blog_title", blogData.blog_title);
     formData.append("blog_description", blogData.blog_description);
     formData.append("blog_content", blogData.blog_content);
-    const newBlogAPI = `${API}/blog/create`;
 
+    setBtnLoading(true);
+    const newBlogAPI = `${API}/blog/create`;
     fetch(newBlogAPI, {
       method: "POST",
       headers: {
@@ -141,10 +167,21 @@ const WriteBlog: FC = () => {
           blogState?.setSelectedBlog(data.blog);
           navigate(`/showblog/${data.blog.blog_id}`);
         } else {
-          console.log(data);
+          setToast(() => ({
+            show: true,
+            background: "danger",
+            message: "Error creating blog try gain later",
+          }));
         }
       })
-      .catch((err) => console.log(err));
+      .catch(() => {
+        setToast(() => ({
+          show: true,
+          background: "danger",
+          message: "Error creating blog try gain later",
+        }));
+      })
+      .finally(() => setBtnLoading(false));
   };
 
   return (
@@ -283,8 +320,17 @@ const WriteBlog: FC = () => {
             </div>
             {/* Create blog Button */}
             <div className=" mt-2 text-end">
-              <Button variant="primary" onClick={handleNewBlog}>
-                Publish
+              <Button
+                variant="primary"
+                onClick={handleNewBlog}
+                style={{ minWidth: "200px" }}
+                disabled={btnLoading}
+              >
+                {btnLoading ? (
+                  <Spinner as="span" size="sm" animation="border" />
+                ) : (
+                  "Publish"
+                )}
               </Button>
             </div>
           </div>
@@ -298,6 +344,23 @@ const WriteBlog: FC = () => {
           </div>
         </div>
       </section>
+
+      {/* Toast */}
+      <Toast
+        onClose={() =>
+          setToast((prev) => ({
+            ...prev,
+            show: false,
+          }))
+        }
+        show={toast.show}
+        delay={3000}
+        bg={toast.background}
+        autohide
+        className=" position-fixed z-3 p-2 end-0 bottom-0 mb-5 me-2 text-white"
+      >
+        <Toast.Body>{toast.message}</Toast.Body>
+      </Toast>
     </main>
   );
 };
