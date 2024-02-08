@@ -26,7 +26,7 @@ const ForgotPassword = () => {
     background: "danger",
     message: "",
   });
-  const [loading, setLoading] = useState<boolean>(false);
+  const [btnLoading, setBtnLoading] = useState<boolean>(false);
 
   const navigate: NavigateFunction = useNavigate();
 
@@ -40,7 +40,7 @@ const ForgotPassword = () => {
       return;
     }
 
-    setLoading(() => true);
+    setBtnLoading(() => true);
 
     // Forgot Password
     const forgotAPI = `${API}/forgot`;
@@ -69,7 +69,7 @@ const ForgotPassword = () => {
             message: data.error,
           }));
         }
-        setLoading(() => false);
+        setBtnLoading(() => false);
       })
       .catch(() => {
         setToast(() => ({
@@ -77,7 +77,7 @@ const ForgotPassword = () => {
           background: "danger",
           message: "Error Checking Email",
         }));
-        setLoading(() => false);
+        setBtnLoading(() => false);
       });
   }
 
@@ -122,7 +122,7 @@ const ForgotPassword = () => {
           onClick={handleForgotEmail}
           style={{ minWidth: "40%" }}
         >
-          {loading ? (
+          {btnLoading ? (
             <Spinner as="span" size="sm" animation="border" />
           ) : (
             "Submit"

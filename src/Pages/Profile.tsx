@@ -6,8 +6,9 @@ import NavBar from "../Components/NavBar";
 import Button from "react-bootstrap/Button";
 import Image from "react-bootstrap/Image";
 import { API } from "../helpers/API";
-import { user } from "../helpers/Types";
+import { toastType, user } from "../helpers/Types";
 import { FaRegEdit } from "react-icons/fa";
+import Toast from "react-bootstrap/Toast";
 
 type userDataType = {
   email: string;
@@ -36,6 +37,12 @@ type profile_img_serverResponse =
 
 const Profile = () => {
   const [loading, setLoading] = useState<boolean>(true);
+  const [btnLoading, setBtnLoading] = useState<boolean>(false);
+  const [toast, setToast] = useState<toastType>({
+    show: false,
+    background: "danger",
+    message: "",
+  });
   const blogState = BlogState();
   const [userData, setUserData] = useState<userDataType>({
     email: "",
@@ -55,9 +62,24 @@ const Profile = () => {
   const handleImageChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0];
 
-    if (!file) return;
+    if (!file) {
+      setToast(() => ({
+        show: true,
+        background: "danger",
+        message: "Image is required",
+      }));
 
-    if (file.size / 1024 > 200) return;
+      return;
+    }
+
+    if (file.size / 1024 > 200) {
+      setToast(() => ({
+        show: true,
+        background: "danger",
+        message: "Image Size should be less than 200KB",
+      }));
+      return;
+    }
 
     const url = URL.createObjectURL(file);
 
@@ -94,10 +116,20 @@ const Profile = () => {
             }
           }
         } else {
-          console.log(data.error);
+          setToast(() => ({
+            show: true,
+            background: "danger",
+            message: "Error updating image try again later",
+          }));
         }
       })
-      .catch((err) => console.log(err))
+      .catch(() => {
+        setToast(() => ({
+          show: true,
+          background: "danger",
+          message: "Error updating image try again later",
+        }));
+      })
       .finally(() => {
         setEditBtn(false);
       });
@@ -130,8 +162,15 @@ const Profile = () => {
 
   const handleNameUpdate = (): void => {
     if (!userData.user_name) {
+      setToast(() => ({
+        show: true,
+        background: "danger",
+        message: "Fields are required",
+      }));
       return;
     }
+
+    setBtnLoading(true);
 
     const UNameUpdateAPI = `${API}/user/profile/update`;
     fetch(UNameUpdateAPI, {
@@ -152,11 +191,23 @@ const Profile = () => {
               user_name: userData.user_name,
             };
 
+            blogState.setLoggedUser((prev) => ({
+              ...prev,
+              user_name: userData.user_name,
+            }));
+
             localStorage.setItem("horizonUser", JSON.stringify(tempUser));
           }
+        } else {
+          setToast(() => ({
+            show: true,
+            background: "danger",
+            message: "Error updating name try again later",
+          }));
         }
       })
-      .catch((err) => console.log(err));
+      .catch((err) => console.log(err))
+      .finally(() => setBtnLoading(false));
   };
 
   if (loading) {
@@ -180,6 +231,8 @@ const Profile = () => {
       <div>
         <NavBar />
       </div>
+
+      {/* Main */}
       <div className="flex-grow-1 d-flex flex-column bg-dark-subtle justify-content-center align-items-center">
         <div className=" d-flex justify-content-center align-items-center flex-column gap-3">
           {/* Profile Images */}
@@ -246,12 +299,38 @@ const Profile = () => {
               />
             </div>
             {/* Profile Images */}
-            <Button variant="primary" onClick={handleNameUpdate}>
-              Submit
+            <Button
+              variant="primary"
+              onClick={handleNameUpdate}
+              style={{ minWidth: "40%" }}
+              disabled={btnLoading}
+            >
+              {btnLoading ? (
+                <Spinner as="span" size="sm" animation="border" />
+              ) : (
+                "Submit"
+              )}
             </Button>{" "}
           </div>
         </div>
       </div>
+
+      {/* Toast */}
+      <Toast
+        onClose={() =>
+          setToast((prev) => ({
+            ...prev,
+            show: false,
+          }))
+        }
+        show={toast.show}
+        delay={3000}
+        bg={toast.background}
+        autohide
+        className=" position-absolute p-2 end-0 bottom-0 mb-5 me-2 text-white"
+      >
+        <Toast.Body>{toast.message}</Toast.Body>
+      </Toast>
     </section>
   );
 };

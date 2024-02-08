@@ -22,6 +22,7 @@ function NavBar() {
       email: "",
       user_name: "",
       token: "",
+      profile_image: "",
     };
     blogState?.setLoggedUser(() => userReset);
     setShowProfile(false);
@@ -35,7 +36,7 @@ function NavBar() {
         setShowProfile(true);
       }
     }
-  }, [blogState?.loggedUser?.email]);
+  }, [blogState?.loggedUser]);
 
   return (
     <Navbar
