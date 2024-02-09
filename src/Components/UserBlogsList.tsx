@@ -64,7 +64,7 @@ const UserBlogsList = () => {
   };
 
   const handleEditBlog = (val: singleBlogPostType): void => {
-    blogState?.setEditBlog(val);
+    blogState?.setEditBlog(() => val);
     navigate("/edit");
   };
 

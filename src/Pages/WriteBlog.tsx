@@ -165,6 +165,7 @@ const WriteBlog: FC = () => {
       .then((data: serverResponse) => {
         if (data.acknowledged) {
           blogState?.setSelectedBlog(data.blog);
+          blogState?.setUserBlogList((prev) => [...prev, data.blog]);
           navigate(`/showblog/${data.blog.blog_id}`);
         } else {
           setToast(() => ({
