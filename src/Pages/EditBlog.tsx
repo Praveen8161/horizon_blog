@@ -162,8 +162,12 @@ const EditBlog: FC = () => {
     const formData: FormData = new FormData();
     if (file) {
       formData.append("file", file);
-    } else if (preview === `${API}/${blogData.blog_image}` && preview) {
-      formData.append("image_path", preview);
+    } else if (
+      preview === `${API}/${blogData.blog_image}` &&
+      preview &&
+      blogData?.blog_image
+    ) {
+      formData.append("image_path", blogData?.blog_image);
     }
 
     // Sending blog_id as String because the formdata doesn't support number | undefined

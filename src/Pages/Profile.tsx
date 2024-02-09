@@ -107,11 +107,12 @@ const Profile = () => {
       .then((data: profile_img_serverResponse) => {
         if (data.acknowledged) {
           const userItem: string | null = localStorage.getItem("horizonUser");
-
+          console.log(userItem);
           if (userItem) {
             const parsedUser: user | null = JSON.parse(userItem);
             if (parsedUser) {
               parsedUser.profile_image = data.profile_image;
+              console.log(parsedUser);
               localStorage.setItem("horizonUser", JSON.stringify(parsedUser));
             }
           }
