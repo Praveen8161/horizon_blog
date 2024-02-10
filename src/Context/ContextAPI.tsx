@@ -70,7 +70,13 @@ const ContextAPI = ({ children }: { children: React.ReactNode }) => {
   const navigate: NavigateFunction = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
-  const paths: string[] = ["/login", "/register", "/forgot", "/showblog"];
+  const paths: string[] = [
+    "/login",
+    "/register",
+    "/forgot",
+    "/showblog",
+    "/staffpick",
+  ];
 
   useEffect((): void => {
     const userItem: string | null = localStorage.getItem("horizonUser");

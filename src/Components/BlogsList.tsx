@@ -1,7 +1,10 @@
+import { NavigateFunction, useNavigate } from "react-router-dom";
 import { BlogState } from "../Context/ContextAPI";
 
 const BlogsList = () => {
   const blogState = BlogState();
+
+  const navigate: NavigateFunction = useNavigate();
   return (
     <>
       <h4 className=" text-center fs-5">Popular Blogs</h4>
@@ -16,6 +19,7 @@ const BlogsList = () => {
                 fontSize: "14px",
               }}
               key={val.blog_title + idx}
+              onClick={() => navigate("/staffpick")}
             >
               <h5 style={{ cursor: "pointer" }} className="fs-6">
                 {val.blog_title}

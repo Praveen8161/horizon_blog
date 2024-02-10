@@ -77,7 +77,7 @@ const ShowBlog = () => {
   if (loading) {
     return (
       <div
-        className="container d-flex align-items-center justify-content-center"
+        className="container d-flex align-items-center justify-content-center flex-column"
         style={{
           minHeight: "100vh",
           minWidth: "100vw",
@@ -86,6 +86,8 @@ const ShowBlog = () => {
         }}
       >
         <div className=" fs-3 fw-bold">Loading...</div>
+        <div>Only At Start It takes some time to start the backend server</div>
+        <div>Please wait </div>
       </div>
     );
   }

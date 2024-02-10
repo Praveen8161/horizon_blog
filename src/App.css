@@ -153,6 +153,21 @@
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  transform: scaleX(-1);
+}
+
+.parallax::after {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: -50px;
+  right: -50px;
+  z-index: -5;
+  height: 5%; /* Adjust this to control the height of the blur */
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), transparent);
+  backdrop-filter: blur(
+    10px
+  ); /* Adjust this to control the intensity of the blur */
 }
 
 /* Footer Shape Divider */

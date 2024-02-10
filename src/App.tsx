@@ -8,6 +8,7 @@ import WriteBlog from "./Pages/WriteBlog";
 import UserBlogs from "./Pages/UserBlogs";
 import ShowBlog from "./Pages/ShowBlog";
 import EditBlog from "./Pages/EditBlog";
+import ExamplePages from "./Pages/ExamplePages";
 
 const App = () => {
   return (
@@ -22,6 +23,7 @@ const App = () => {
         <Route path="/userblog" element={<UserBlogs />} />
         <Route path="/showblog/:id" element={<ShowBlog />} />
         <Route path="/edit" element={<EditBlog />} />
+        <Route path="/staffpick" element={<ExamplePages />} />
         <Route path="*" element={<HomePage />} />
       </Routes>
     </>
