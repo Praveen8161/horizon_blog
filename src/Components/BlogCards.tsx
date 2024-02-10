@@ -1,9 +1,15 @@
 import Card from "react-bootstrap/Card";
 import { data } from "../helpers/Data";
+import { NavigateFunction, useNavigate } from "react-router-dom";
 
 const BlogCards = ({ values }: { values: data }) => {
+  const navigate: NavigateFunction = useNavigate();
   return (
-    <Card className="card_bg" style={{ cursor: "pointer" }}>
+    <Card
+      className="card_bg"
+      style={{ cursor: "pointer" }}
+      onClick={() => navigate("/staffpick")}
+    >
       <Card.Img
         variant="top"
         src={`${

@@ -1,3 +1,4 @@
+import { NavigateFunction, useNavigate } from "react-router-dom";
 import BlogCards from "../Components/BlogCards";
 import BlogsList from "../Components/BlogsList";
 import Footer from "../Components/Footer";
@@ -6,6 +7,8 @@ import { BlogState } from "../Context/ContextAPI";
 
 const HomePage = () => {
   const blogState = BlogState();
+
+  const navigate: NavigateFunction = useNavigate();
 
   return (
     <main
@@ -24,6 +27,7 @@ const HomePage = () => {
           <div
             className="col-12 col-md-6 bg-white rounded-3 overflow-hidden px-0 border border-black-subtle"
             style={{ height: "55vh", minHeight: "55vh", cursor: "pointer" }}
+            onClick={() => navigate("staffpick")}
           >
             <img
               src={
