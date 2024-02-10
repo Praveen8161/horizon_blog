@@ -108,6 +108,16 @@ const Register = () => {
     }
   }, []);
 
+  // Server Notify
+  useEffect(() => {
+    setToast(() => ({
+      show: true,
+      background: "info",
+      message:
+        "Only at first it takes some times to load server instance at render please wait",
+    }));
+  }, []);
+
   return (
     <main className="container-fluid d-flex justify-content-center align-items-center min-vh-100 gap-3 flex-column">
       <h1
