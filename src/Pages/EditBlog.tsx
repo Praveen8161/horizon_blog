@@ -234,6 +234,15 @@ const EditBlog: FC = () => {
       .finally(() => setBtnLoading(false));
   };
 
+  useEffect(() => {
+    setToast(() => ({
+      show: true,
+      background: "info",
+      message:
+        "Image may or may not available because images are stored in Render's server instance not on the actual server",
+    }));
+  }, []);
+
   //   Checking the Editable Blog and updating Local State Blog Data
   useEffect(() => {
     if (!blogState?.editBlog.blog_id) {

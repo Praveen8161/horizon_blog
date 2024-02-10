@@ -12,6 +12,7 @@ import BlogsList from "../Components/BlogsList.tsx";
 import { singleBlogPostType, toastType } from "../helpers/Types.ts";
 import { NavigateFunction, useNavigate } from "react-router-dom";
 import { Spinner, Toast } from "react-bootstrap";
+import Footer from "../Components/Footer.tsx";
 
 type blogDataType = {
   blog_title: string;
@@ -362,6 +363,10 @@ const WriteBlog: FC = () => {
       >
         <Toast.Body>{toast.message}</Toast.Body>
       </Toast>
+
+      <div className=" mt-5">
+        <Footer />
+      </div>
     </main>
   );
 };

@@ -74,6 +74,15 @@ const ShowBlog = () => {
     }
   }, []);
 
+  useEffect(() => {
+    setToast(() => ({
+      show: true,
+      background: "info",
+      message:
+        "Image may or may not available because images are stored in Render's server instance not on the actual server",
+    }));
+  }, []);
+
   if (loading) {
     return (
       <div
