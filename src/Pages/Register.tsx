@@ -53,6 +53,16 @@ const Register = () => {
       const userName = userNameRef.current.value;
       const password = passwordRef.current.value;
       setBtnLoading(() => true);
+
+      // Server Slow Notify
+      setTimeout(() => {
+        setToast(() => ({
+          show: true,
+          background: "info",
+          message:
+            "Only at first it takes some times to load server instance at render please wait",
+        }));
+      }, 6000);
       // registering in Database
       const registerAPI = `${API}/register`;
       fetch(registerAPI, {
@@ -106,16 +116,6 @@ const Register = () => {
       const currUser: user | null = JSON.parse(userItem);
       if (currUser?.email) navigate("/", { replace: true });
     }
-  }, []);
-
-  // Server Notify
-  useEffect(() => {
-    setToast(() => ({
-      show: true,
-      background: "info",
-      message:
-        "Only at first it takes some times to load server instance at render please wait",
-    }));
   }, []);
 
   return (

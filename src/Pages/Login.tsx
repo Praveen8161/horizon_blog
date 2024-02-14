@@ -53,6 +53,16 @@ const Login = () => {
 
       setBtnLoading(() => true);
 
+      // Server Slow Notify
+      setTimeout(() => {
+        setToast(() => ({
+          show: true,
+          background: "info",
+          message:
+            "Only at first it takes some times to load server instance at render please wait",
+        }));
+      }, 6000);
+
       // Login in
       const loginAPI = `${API}/login`;
       fetch(loginAPI, {
@@ -105,16 +115,6 @@ const Login = () => {
       const currUser: user | null = JSON.parse(userItem);
       if (currUser?.email) navigate("/", { replace: true });
     }
-  }, []);
-
-  // Server Notify
-  useEffect(() => {
-    setToast(() => ({
-      show: true,
-      background: "info",
-      message:
-        "Only at first it takes some times to load server instance at render please wait",
-    }));
   }, []);
 
   return (
