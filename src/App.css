@@ -119,75 +119,7 @@
   transform: scale(1.005);
 }
 
-/* Parallex scrolling effect for Home page Background */
-
-.parallax_main::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: -300px;
-  z-index: -5;
-
-  /* Parallax Effect */
-  background-image: url("https://cdn.pixabay.com/photo/2023/10/18/17/36/physics-8324786_1280.jpg");
-  background-attachment: fixed;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
+/* Background */
+.custom_background {
+  background: linear-gradient(to right, rgb(236, 219, 219), rgb(228, 220, 220));
 }
-
-.parallax::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -50px;
-  right: -50px;
-  bottom: 0;
-  z-index: -5;
-
-  /* Parallax Effect */
-  background-image: url("https://cdn.pixabay.com/photo/2023/10/18/17/36/physics-8324791_960_720.jpg");
-  background-attachment: fixed;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: cover;
-  transform: scaleX(-1);
-}
-
-.parallax::after {
-  content: "";
-  position: absolute;
-  top: -5px;
-  left: -50px;
-  right: -50px;
-  z-index: -5;
-  height: 5%; /* Adjust this to control the height of the blur */
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.5), transparent);
-  backdrop-filter: blur(
-    10px
-  ); /* Adjust this to control the intensity of the blur */
-}
-
-/* Footer Shape Divider */
-/* .custom-shape-divider-bottom-1707159217 {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  overflow: hidden;
-  line-height: 0;
-  transform: rotate(180deg);
-}
-
-.custom-shape-divider-bottom-1707159217 svg {
-  position: relative;
-  display: block;
-  width: calc(300% + 1.3px);
-  height: 300px;
-}
-
-.custom-shape-divider-bottom-1707159217 .shape-fill {
-  fill: #212e3b;
-} */

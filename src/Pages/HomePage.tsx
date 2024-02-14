@@ -12,13 +12,13 @@ const HomePage = () => {
 
   return (
     <main
-      className=" overflow-hidden parallax_main"
+      className=" overflow-hidden custom_background "
       style={{ maxWidth: "100vw" }}
     >
       <header>
         <NavBar />
       </header>
-      <section className="pt-2 px-sm-5 container-fluid overflow-hidden text-white">
+      <section className="pt-2 px-sm-5 container-fluid overflow-hidden">
         <h2 className="fs-3">Horizon: unleash your creativity</h2>
 
         {/* Top Row */}
@@ -62,7 +62,7 @@ const HomePage = () => {
         </div>
 
         {/* Bottom Row */}
-        <div className="row position-relative py-3 parallax">
+        <div className="row position-relative py-3">
           <div className="col custom_grid--layout gap-5">
             {blogState?.blogData.length &&
               blogState.blogData.map((val, idx) => (
